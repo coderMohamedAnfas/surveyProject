@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">Edit Entries</h1>
+                </div>
+                <div class="col-sm-6">
+                    <a href="{% url 'index' %}" class="btn btn-secondary float-right">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="container-fluid">
+            <!-- Edit InputCategory -->
+            <h3>Edit Input Category</h3>
+            <form method="POST" action="{% url 'edit_category' category.id %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="categoryName">Category Name</label>
+                    <input type="text" id="categoryName" name="name" class="form-control" value="{{ category.name }}" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+
+            <!-- Edit Input -->
+            <h3>Edit Input</h3>
+            <form method="POST" action="{% url 'edit_input' input.id %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="inputName">Input Name</label>
+                    <input type="text" id="inputName" name="name" class="form-control" value="{{ input.name }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="inputCategory">Category</label>
+                    <select id="inputCategory" name="category_id" class="form-control" required>
+                        {% for cat in categories %}
+                            <option value="{{ cat.id }}" {% if input.category.id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+
+            <!-- Edit Productive -->
+            <h3>Edit Productive</h3>
+            <form method="POST" action="{% url 'edit_productive' productive.id %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="productivityValue">Productivity Value (%)</label>
+                    <input type="number" id="productivityValue" name="productivity" class="form-control" value="{{ productive.productivity }}" step="0.1" min="0" max="100" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+
+            <!-- Edit Employ Welfare -->
+            <h3>Edit Employ Welfare</h3>
+            <form method="POST" action="{% url 'edit_employ_welfare' employ_welfare.id %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="employWelfareValue">Employ Welfare Value (%)</label>
+                    <input type="number" id="employWelfareValue" name="employ_welfare" class="form-control" value="{{ employ_welfare.employ_welfare }}" step="0.1" min="0" max="100" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

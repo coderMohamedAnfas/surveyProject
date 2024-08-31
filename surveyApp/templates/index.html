@@ -21,7 +21,7 @@
                 <div class="col-lg-6 col-6">
                     <div class="small-box bg-info">
                         <div class="inner">
-                            <h3>{{ selected_productivity_avg|default:"-" }}%</h3>
+                            <h3>{{ selected_productivity_avg|default:"0" }}%</h3>
                             <p>Average Productivity</p>
                         </div>
                     </div>
@@ -29,90 +29,103 @@
                 <div class="col-lg-6 col-6">
                     <div class="small-box bg-success">
                         <div class="inner">
-                            <h3>{{ selected_employ_welfare_avg|default:"-" }}%</h3>
+                            <h3>{{ selected_employ_welfare_avg|default:"0" }}%</h3>
                             <p>Average Employ Welfare</p>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <button class="btn btn-success mb-3" data-toggle="modal" data-target="#addInputModal">Add New Input</button>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Input</th>
+                                <th>Productivity</th>
+                                <th>Employ Welfare</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for input in inputs %}
+                            <tr>
+                                <td>{{ input.name }}</td>
+                                <td>
+                                    {% for productive in input.productives.all %}
+                                        {{ productive.productivity }}%
+                                        <form method="POST" action="{% url 'index' %}">
+                                            {% csrf_token %}
+                                            <button name="productivity_{{ productive.id }}" value="{{ productive.id }}" class="btn {% if productive.is_selected %}btn-success{% else %}btn-info{% endif %}">
+                                                {% if productive.is_selected %}Selected{% else %}Select{% endif %}
+                                            </button>
+                                        </form>
+                                    {% empty %}
+                                        -
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% for welfare in input.employ_welfares.all %}
+                                        {{ welfare.employ_welfare }}%
+                                        <form method="POST" action="{% url 'index' %}">
+                                            {% csrf_token %}
+                                            <button name="welfare_{{ welfare.id }}" value="{{ welfare.id }}" class="btn {% if welfare.is_selected %}btn-success{% else %}btn-info{% endif %}">
+                                                {% if welfare.is_selected %}Selected{% else %}Select{% endif %}
+                                            </button>
+                                        </form>
+                                    {% empty %}
+                                        -
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'edit_input' input.id %}" class="btn btn-warning">Edit</a>
+                                    <a href="{% url 'delete_input' input.id %}" class="btn btn-danger">Delete</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal -->
-<div class="modal fade" id="dataModal" tabindex="-1" aria-labelledby="dataModalLabel" aria-hidden="true">
+<!-- Modal for Adding New Input -->
+<div class="modal fade" id="addInputModal" tabindex="-1" aria-labelledby="addInputModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="dataModalLabel">Manage Data</h5>
+                <h5 class="modal-title" id="addInputModalLabel">Add New Input</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <form method="GET" action="{% url 'data_management_view' %}">
+                <form method="POST" action="{% url 'add_input' %}">
                     {% csrf_token %}
                     <div class="form-group">
-                        <label for="categorySelect">Select Category</label>
-                        <select name="category_id" id="categorySelect" class="form-control" onchange="this.form.submit()">
-                            <option value="">All Categories</option>
+                        <label for="input_name">Input Name</label>
+                        <input type="text" class="form-control" id="input_name" name="input_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="categorySelect">Category</label>
+                        <select name="category_id" id="categorySelect" class="form-control" required>
                             {% for category in categories %}
                                 <option value="{{ category.id }}">{{ category.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                </form>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Input</th>
-                            <th>Productivity</th>
-                            <th>Employ Welfare</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for input in inputs %}
-                        <tr>
-                            <td>{{ input.name }}</td>
-                            <td>
-                                {% if input.productive.is_selected %}
-                                    <button class="btn btn-success" formmethod="post" formaction="{% url 'data_management_view' %}?select_productivity">Selected</button>
-                                {% else %}
-                                    <button class="btn btn-secondary" formmethod="post" formaction="{% url 'data_management_view' %}?select_productivity">Select</button>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if input.employwelfare.is_selected %}
-                                    <button class="btn btn-success" formmethod="post" formaction="{% url 'data_management_view' %}?select_employ_welfare">Selected</button>
-                                {% else %}
-                                    <button class="btn btn-secondary" formmethod="post" formaction="{% url 'data_management_view' %}?select_employ_welfare">Select</button>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <button class="btn btn-danger" formaction="{% url 'delete_entry' input.id %}">Delete</button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <div class="modal-footer">
-
-                <form method="POST" action="{% url 'add_input_category' %}">
-                    {% csrf_token %}
-                    <input type="text" name="name" placeholder="Add Input Category" required>
-                    <button type="submit" class="btn btn-primary">Add</button>
-                </form>
-                <form method="POST" action="{% url 'add_input' %}">
-                    {% csrf_token %}
-                    <select name="category_id" required>
-                        {% for category in categories %}
-                            <option value="{{ category.id }}">{{ category.name }}</option>
-                        {% endfor %}
-                    </select>
-                    <input type="text" name="name" placeholder="Add Input" required>
-                    <button type="submit" class="btn btn-primary">Add</button>
+                    <div class="form-group">
+                        <label for="productivity">Productivity (%)</label>
+                        <input type="number" class="form-control" id="productivity" name="productivity" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="employ_welfare">Employ Welfare (%)</label>
+                        <input type="number" class="form-control" id="employ_welfare" name="employ_welfare" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Input</button>
                 </form>
             </div>
         </div>

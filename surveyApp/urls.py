@@ -1,9 +1,13 @@
 from django.urls import path
-from .views import index, data_management_view, add_input_category, add_input
+from . import views
 
 urlpatterns = [
-    path('', index, name='index'),
-    path('manage/', data_management_view, name='data_management_view'),
-    path('add-category/', add_input_category, name='add_input_category'),
-    path('add-input/', add_input, name='add_input'),
+    path('', views.index, name='index'),
+    path('add_input/', views.add_input, name='add_input'),
+    path('edit_input/<int:input_id>/', views.edit_input, name='edit_input'),
+    path('delete_input/<int:input_id>/', views.delete_input, name='delete_input'),
+    path('edit_category/<int:category_id>/', views.edit_category, name='edit_category'),
+    path('edit_input/<int:input_id>/', views.edit_input, name='edit_input'),
+    path('edit_productive/<int:productive_id>/', views.edit_productive, name='edit_productive'),
+    path('edit_employ_welfare/<int:employ_welfare_id>/', views.edit_employ_welfare, name='edit_employ_welfare'),
 ]
