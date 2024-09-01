@@ -8,8 +8,10 @@
                 <div class="col-sm-6">
                     <h1 class="m-0">Survey Dashboard</h1>
                 </div>
-                <div class="col-sm-6">
-                    <button class="btn btn-primary float-right" data-toggle="modal" data-target="#dataModal">Manage Data</button>
+                <div class="col-sm-6 text-right">
+                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#manageDataModal">
+                        <i class="fas fa-cogs"></i> Manage Data
+                    </button>
                 </div>
             </div>
         </div>
@@ -18,29 +20,52 @@
     <div class="content">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-lg-6 col-6">
-                    <div class="small-box bg-info">
-                        <div class="inner">
-                            <h3>{{ selected_productivity_avg|default:"0" }}%</h3>
+                <div class="col-12 col-md-6 mb-4">
+                    <div class="card bg-gradient-primary text-white">
+                        <div class="card-body text-center">
+                            <h1 class="display-4">{{ selected_productivity_avg|default:"0" }}%</h1>
                             <p>Average Productivity</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-6 col-6">
-                    <div class="small-box bg-success">
-                        <div class="inner">
-                            <h3>{{ selected_employ_welfare_avg|default:"0" }}%</h3>
+                <div class="col-12 col-md-6 mb-4">
+                    <div class="card bg-gradient-success text-white">
+                        <div class="card-body text-center">
+                            <h1 class="display-4">{{ selected_employ_welfare_avg|default:"0" }}%</h1>
                             <p>Average Employ Welfare</p>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
 
-            <div class="row">
-                <div class="col-12">
-                    <button class="btn btn-success mb-3" data-toggle="modal" data-target="#addInputModal">Add New Input</button>
-                    <table class="table table-striped">
-                        <thead>
+<!-- Modal for Managing Data -->
+<div class="modal fade" id="manageDataModal" tabindex="-1" aria-labelledby="manageDataModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="manageDataModalLabel"><i class="fas fa-tasks"></i> Manage Data</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#addCategoryModal">
+                        <i class="fas fa-plus-circle"></i> Add Category
+                    </button>
+                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addInputModal">
+                        <i class="fas fa-plus"></i> Add Input
+                    </button>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search inputs...">
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped" id="inputsTable">
+                        <thead class="thead-dark">
                             <tr>
                                 <th>Input</th>
                                 <th>Productivity</th>
@@ -55,12 +80,15 @@
                                 <td>
                                     {% for productive in input.productives.all %}
                                         {{ productive.productivity }}%
-                                        <form method="POST" action="{% url 'index' %}">
+                                        <form method="POST" action="{% url 'index' %}" style="display:inline;">
                                             {% csrf_token %}
-                                            <button name="productivity_{{ productive.id }}" value="{{ productive.id }}" class="btn {% if productive.is_selected %}btn-success{% else %}btn-info{% endif %}">
-                                                {% if productive.is_selected %}Selected{% else %}Select{% endif %}
+                                            <button name="productivity_{{ productive.id }}" value="{{ productive.id }}" class="btn {% if productive.is_selected %}btn-success{% else %}btn-info{% endif %} btn-sm">
+                                                <i class="fas {% if productive.is_selected %}fa-check-circle{% else %}fa-circle{% endif %}"></i>
                                             </button>
                                         </form>
+                                        <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editProductiveModal" data-id="{{ productive.id }}" data-productivity="{{ productive.productivity }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
                                     {% empty %}
                                         -
                                     {% endfor %}
@@ -68,19 +96,23 @@
                                 <td>
                                     {% for welfare in input.employ_welfares.all %}
                                         {{ welfare.employ_welfare }}%
-                                        <form method="POST" action="{% url 'index' %}">
+                                        <form method="POST" action="{% url 'index' %}" style="display:inline;">
                                             {% csrf_token %}
-                                            <button name="welfare_{{ welfare.id }}" value="{{ welfare.id }}" class="btn {% if welfare.is_selected %}btn-success{% else %}btn-info{% endif %}">
-                                                {% if welfare.is_selected %}Selected{% else %}Select{% endif %}
+                                            <button name="welfare_{{ welfare.id }}" value="{{ welfare.id }}" class="btn {% if welfare.is_selected %}btn-success{% else %}btn-info{% endif %} btn-sm">
+                                                <i class="fas {% if welfare.is_selected %}fa-check-circle{% else %}fa-circle{% endif %}"></i>
                                             </button>
                                         </form>
+                                        <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editWelfareModal" data-id="{{ welfare.id }}" data-employ-welfare="{{ welfare.employ_welfare }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
                                     {% empty %}
                                         -
                                     {% endfor %}
                                 </td>
                                 <td>
-                                    <a href="{% url 'edit_input' input.id %}" class="btn btn-warning">Edit</a>
-                                    <a href="{% url 'delete_input' input.id %}" class="btn btn-danger">Delete</a>
+                                    <a href="{% url 'delete_input' input.id %}" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -92,13 +124,37 @@
     </div>
 </div>
 
-<!-- Modal for Adding New Input -->
+<!-- Modal for Adding Category -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="addCategoryModalLabel"><i class="fas fa-plus-circle"></i> Add Category</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'add_category' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="category_name">Category Name</label>
+                        <input type="text" class="form-control" id="category_name" name="category_name" required>
+                    </div>
+                    <button type="submit" class="btn btn-success btn-block btn-sm"><i class="fas fa-save"></i> Add Category</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Adding Input -->
 <div class="modal fade" id="addInputModal" tabindex="-1" aria-labelledby="addInputModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addInputModalLabel">Add New Input</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="addInputModalLabel"><i class="fas fa-plus"></i> Add New Input</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -117,18 +173,135 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="productivity">Productivity (%)</label>
-                        <input type="number" class="form-control" id="productivity" name="productivity" required>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="productivity">Productivity (%)</label>
+                            <input type="number" class="form-control" id="productivity" name="productivity" required>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="employ_welfare">Employ Welfare (%)</label>
+                            <input type="number" class="form-control" id="employ_welfare" name="employ_welfare" required>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="employ_welfare">Employ Welfare (%)</label>
-                        <input type="number" class="form-control" id="employ_welfare" name="employ_welfare" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Add Input</button>
+                    <button type="submit" class="btn btn-primary btn-block btn-sm"><i class="fas fa-save"></i> Add Input</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Modal for Editing Productive -->
+<div class="modal fade" id="editProductiveModal" tabindex="-1" aria-labelledby="editProductiveModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-white">
+                <h5 class="modal-title" id="editProductiveModalLabel"><i class="fas fa-edit"></i> Edit Productive</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'edit_productive' %}">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit_productive_id" name="productive_id">
+                    <div class="form-group">
+                        <label for="edit_productivity">Productivity (%)</label>
+                        <input type="number" class="form-control" id="edit_productivity" name="edit_productivity" required>
+                    </div>
+                    <button type="submit" class="btn btn-warning btn-block btn-sm"><i class="fas fa-save"></i> Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Editing Welfare -->
+<div class="modal fade" id="editWelfareModal" tabindex="-1" aria-labelledby="editWelfareModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-white">
+                <h5 class="modal-title" id="editWelfareModalLabel"><i class="fas fa-edit"></i> Edit Employ Welfare</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'edit_welfare' %}">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit_welfare_id" name="welfare_id">
+                    <div class="form-group">
+                        <label for="edit_employ_welfare">Employ Welfare (%)</label>
+                        <input type="number" class="form-control" id="edit_employ_welfare" name="edit_employ_welfare" required>
+                    </div>
+                    <button type="submit" class="btn btn-warning btn-block btn-sm"><i class="fas fa-save"></i> Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#editProductiveModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var id = button.data('id');
+            var productivity = button.data('productivity');
+            var modal = $(this);
+            modal.find('#edit_productive_id').val(id);
+            modal.find('#edit_productivity').val(productivity);
+        });
+
+        $('#editWelfareModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var id = button.data('id');
+            var welfare = button.data('employ-welfare');
+            var modal = $(this);
+            modal.find('#edit_welfare_id').val(id);
+            modal.find('#edit_employ_welfare').val(welfare);
+        });
+    });
+    
+//     $(document).ready(function() {
+//     $('#editProductiveModal').on('show.bs.modal', function (event) {
+//         var button = $(event.relatedTarget);
+//         var productiveId = button.data('id');
+//         var productivity = button.data('productivity');
+
+//         var modal = $(this);
+//         modal.find('#productive_id').val(productiveId);
+//         modal.find('#edit_productivity').val(productivity);
+//     });
+
+//     $('#editWelfareModal').on('show.bs.modal', function (event) {
+//         var button = $(event.relatedTarget);
+//         var welfareId = button.data('id');
+//         var employWelfare = button.data('employ-welfare');
+
+//         var modal = $(this);
+//         modal.find('#welfare_id').val(welfareId);
+//         modal.find('#edit_employ_welfare').val(employWelfare);
+//     });
+// });
+    document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('searchInput');
+    const table = document.getElementById('inputsTable');
+    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+    searchInput.addEventListener('keyup', function () {
+        const filter = searchInput.value.toLowerCase();
+        for (let i = 0; i < rows.length; i++) {
+            const cells = rows[i].getElementsByTagName('td');
+            let showRow = false;
+            for (let j = 0; j < cells.length; j++) {
+                if (cells[j].textContent.toLowerCase().indexOf(filter) > -1) {
+                    showRow = true;
+                    break;
+                }
+            }
+            rows[i].style.display = showRow ? '' : 'none';
+        }
+    });
+});
+</script>
+
 {% endblock %}
